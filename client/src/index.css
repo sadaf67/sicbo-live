@@ -1,0 +1,2016 @@
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap");
+
+:root {
+  /* Felt-green / gold casino palette, centralized so every panel/card reads as one coherent
+     design language instead of each component re-declaring its own greens. */
+  --felt-950: #081611;
+  --felt-900: #0d1f16;
+  --felt-800: #10261a;
+  --felt-700: #123822;
+  --felt-line: #2e5c3e;
+  --felt-line-soft: rgba(46, 92, 62, 0.6);
+  --gold: #d4af37;
+  --gold-bright: #f2c230;
+  --gold-soft: rgba(212, 175, 55, 0.35);
+  --ink: #f1efe9;
+  --ink-muted: #cfcfcf;
+  --ink-faint: #8fae9a;
+  --danger: #c0293a;
+  --danger-strong: #a3202c;
+  --success: #3ddc57;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  --shadow-raised: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  min-height: 100vh;
+  width: 100%;
+  /* Defensive: nothing in the layout is meant to be wider than the viewport, but a stray fixed
+     width slipping in on some future component shouldn't produce a horizontally-scrollable page. */
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  direction: rtl;
+  font-family: "Vazirmatn", Tahoma, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--felt-900);
+  /* Subtle vignette + soft top glow instead of a flat fill, so every page (not just the auth
+     screen) has a bit of depth rather than looking like a solid color swatch. */
+  background-image:
+    radial-gradient(circle at 50% -10%, rgba(46, 92, 62, 0.35), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.05), transparent 45%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Thin gold-on-dark scrollbars everywhere something scrolls (side drawer, chat, board on small
+   landscape screens) instead of the browser's default bar clashing with the felt theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--felt-line) var(--felt-800);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--felt-line);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-soft);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select {
+  font-family: inherit;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #3a3a3a;
+  background: #1c1c1c;
+  color: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:hover, select:hover {
+  border-color: #565656;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gold);
+  background: #1c1c1c;
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, filter 0.12s ease;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #1a1300;
+  border-color: var(--gold);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, var(--danger), var(--danger-strong));
+  color: #fff;
+  border-color: var(--danger-strong);
+  box-shadow: 0 4px 14px rgba(163, 32, 44, 0.3);
+}
+
+/* --- Auth --- */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08), transparent 45%),
+    radial-gradient(circle at top, var(--felt-700), var(--felt-900) 70%);
+}
+
+.auth-card {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  /* min() instead of a hard 360px - on very narrow phones (~320-375px wide) a fixed width plus
+     the page's own padding used to overflow the viewport and force horizontal scrolling. */
+  width: min(360px, 100%);
+  box-shadow: var(--shadow-raised);
+}
+
+@media (max-width: 420px) {
+  .auth-card {
+    padding: 24px 20px;
+  }
+}
+
+.auth-card h1 {
+  text-align: center;
+  color: var(--gold);
+  margin-top: 0;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(212, 175, 55, 0.25);
+}
+
+.auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-error {
+  color: #ff8a8a;
+  font-size: 13px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.auth-hint {
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* --- Generic modal overlay (currently: admin's verification-photo viewer, legacy accounts only) --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-card {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: min(360px, 100%);
+  box-shadow: var(--shadow-raised);
+}
+
+/* --- Lobby --- */
+.lobby-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.lobby-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--felt-line-soft);
+  font-weight: 600;
+}
+
+.lobby-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.lobby-role-badge {
+  color: var(--gold);
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.lobby-card {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.lobby-card h2 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--gold);
+}
+
+.lobby-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lobby-row label {
+  /* Intrinsic wrapping instead of a fixed breakpoint: once a field can't fit at least ~130px
+     (e.g. AdminPage's 4-field plan row, or LobbyPage's 3-field table row, on a narrow phone) it
+     drops to its own line instead of squeezing every input down to an unusable sliver. */
+  flex: 1 1 130px;
+}
+
+/* Override the global `label { flex-direction: column }` for checkbox rows (e.g. the "restrict
+   BIG/SMALL/ODD/EVEN bet range" option on table creation) - the checkbox and its text sit side by
+   side on one line instead of stacking like a text-input label. */
+.checkbox-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+/* --- Table page --- */
+.table-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--felt-line-soft);
+}
+
+/* Header title shows the logged-in user's own name front and center (matches the lobby/admin
+   headers' "خوش آمدی، <name>" greeting), with the table's name kept as a small subtitle
+   underneath - useful for a dealer/player with more than one table open across tabs, but
+   secondary to "whose screen is this". */
+.table-header-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 6px;
+}
+
+.table-header h2 {
+  margin: 0;
+  color: var(--gold);
+  font-size: 18px;
+  /* Names can still be long - truncate instead of letting one push the wallet badge off the edge
+     of a narrow phone screen. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.table-header-table-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.table-header .wallet-badge {
+  flex-shrink: 0;
+}
+
+.hamburger-btn {
+  position: relative;
+  font-size: 18px;
+  padding: 7px 12px;
+  line-height: 1;
+}
+
+.hamburger-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger, #d64545);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--felt-900, #1b2b22);
+}
+
+.table-status-row {
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  letter-spacing: 0.2px;
+}
+
+/* Primary "at a glance" controls, pinned right under the header/status instead of buried in the
+   side column below the (often tall) board. Holds the last roll's result (once there is one) and
+   the chip picker a player bets with - both are things you need constantly during play, not just
+   once per round, so they stay reachable without scrolling past the whole board on a phone. */
+.table-top-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Always-visible min/max bet reminder next to the ChipSelector, kept in sync with GroupStateDto
+   (fetched on load/poll) and live-refreshed the instant the dealer changes limits via the
+   TokenLimitsUpdated SignalR broadcast - not just shown reactively in the dismissible toast. */
+.bet-limits-display {
+  font-size: 13px;
+  color: var(--ink-muted);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-sm, 8px);
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.table-page-loading {
+  text-align: center;
+  padding: 60px;
+  color: var(--ink-muted);
+  font-size: 15px;
+}
+
+.dealer-round-controls {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-card);
+}
+
+.dealer-player-balances {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-card);
+  font-size: 13px;
+}
+
+.dealer-player-balances h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+.dealer-player-balances ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.dealer-player-balances li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #f1efe9;
+}
+
+.dealer-player-balances-amount {
+  font-weight: 700;
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Big-number betting-window countdown - one for the dealer (next to the roll button, so it's
+   obvious the moment it's time to roll) and one for the player (up top with the dice/chips). */
+.round-timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: center;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--felt-line);
+  border-radius: 10px;
+  padding: 6px 14px;
+}
+
+.round-timer-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--success);
+  min-width: 1.4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.round-timer-label {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.round-timer-urgent .round-timer-value {
+  color: #ff5252;
+  animation: round-timer-pulse 0.6s ease-in-out infinite alternate;
+}
+
+.round-timer-done {
+  border-color: #ff5252;
+}
+
+.round-timer-done .round-timer-value {
+  color: #ff5252;
+}
+
+.round-timer-done .round-timer-label {
+  color: #ff8a8a;
+  font-weight: 700;
+}
+
+@keyframes round-timer-pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+
+/* Draws the dealer's eye straight to the roll button once the countdown hits 0. */
+.btn.roll-ready {
+  animation: roll-ready-glow 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes roll-ready-glow {
+  from {
+    box-shadow: 0 0 6px 1px rgba(255, 82, 82, 0.6);
+  }
+  to {
+    box-shadow: 0 0 18px 5px rgba(255, 82, 82, 1);
+  }
+}
+
+/* Main game area: board + compact side panel (dice/chips/wallet actions). Stacked by default,
+   switches to side-by-side in landscape (see media query below) so phones in landscape don't need
+   to scroll past the whole board to reach the dice tray / chip selector. */
+.table-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.table-board-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.table-side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- Side drawer (hamburger menu): video, chat, dealer settings, my-bets list --- */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 40;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(360px, 90vw);
+  background: linear-gradient(180deg, var(--felt-900), var(--felt-950));
+  border-left: 1px solid var(--felt-line);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.side-drawer.open {
+  transform: translateX(0);
+}
+
+.side-drawer-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  padding: 10px;
+  background: var(--felt-900);
+  border-bottom: 1px solid var(--felt-line);
+  z-index: 1;
+}
+
+.side-drawer-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .table-page {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .table-header h2 {
+    font-size: 15px;
+  }
+
+  .table-top-panel {
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .chip-selector-label {
+    display: none;
+  }
+
+  .table-main {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .table-board-col {
+    max-height: 92vh;
+    overflow-y: auto;
+    padding-left: 2px;
+  }
+
+  .table-side-col {
+    flex: 0 0 190px;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .video-panel {
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+
+/* --- Wallet / chips --- */
+.wallet-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, #232323, #1c1c1c);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 6px 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.wallet-badge-label {
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+
+.wallet-badge-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 1px 6px rgba(212, 175, 55, 0.3);
+}
+
+.chip-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.chip-selector-label {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.chip {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px dashed var(--gold);
+  background: radial-gradient(circle at 35% 30%, #d33746, #a3202c 55%, #6f1420);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 0 0 3px rgba(255, 255, 255, 0.08);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.chip:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45), inset 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.chip-active {
+  border-style: solid;
+  box-shadow: 0 0 0 3px var(--gold-soft), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.chip:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.chip:not(:disabled) {
+  cursor: grab;
+}
+
+.chip:not(:disabled):active {
+  cursor: grabbing;
+}
+
+/* --- Dice --- */
+.dice-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.dice-tray-dice {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(180deg, var(--felt-700), #0e2c1b);
+  border-radius: 12px;
+  border: 1px solid var(--felt-line);
+  box-shadow: var(--shadow-card);
+}
+
+.dice-tray-dice.rolling .dice-face {
+  animation: shake 0.15s infinite;
+}
+
+@keyframes shake {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(15deg); }
+  100% { transform: rotate(-15deg); }
+}
+
+.dice-tray-total {
+  font-size: 14px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* --- Dice roll overlay ---
+   Full-screen suspense screen shown to everyone while a round settles. The real settlement result
+   already exists on the server by the time this appears (RollDiceCommand settles synchronously),
+   but TablePage withholds it from the UI until this overlay's countdown finishes, so the table
+   gets a proper "dice are tumbling" moment instead of an instant reveal. z-index sits above the
+   side drawer (41) so it covers the whole app, drawer included. */
+.dice-roll-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: rgba(6, 20, 12, 0.92);
+  animation: dice-roll-overlay-fade-in 0.2s ease-out;
+}
+
+@keyframes dice-roll-overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Dice dome shaker ---
+   Modeled after a physical dice shaker the user photographed: a black cylindrical base topped
+   with a clear acrylic dome, a metal trim ring where the dome meets the base, green felt visible
+   on the floor inside the dome, and three dice rattling around on that felt (not dropping through
+   a tower). Replaces the earlier "acrylic dice tower" design (zigzag baffles, dice falling in from
+   the top) per the user's follow-up request to match this specific device instead - the dice now
+   shake together in place rather than falling any distance. */
+.dice-dome {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Soft ambient glow behind the whole device - reuses the same --gold-soft "stage lighting" trick
+   the earlier tower design used, just recentered behind the dome instead of the tube. */
+.dice-dome-glow {
+  position: absolute;
+  top: 6%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-soft), rgba(212, 175, 55, 0) 70%);
+  filter: blur(6px);
+  animation: dice-dome-glow-pulse 2.4s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes dice-dome-glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.94); }
+  50% { opacity: 0.95; transform: scale(1.04); }
+}
+
+/* The clear acrylic dome: rounded like a real dome on top, a much smaller radius at the bottom
+   corners so it reads as "a dome sitting on a floor" rather than a plain circle. `overflow: hidden`
+   keeps the shaking dice and the felt floor confined to the dome's silhouette. */
+.dice-dome-glass {
+  position: relative;
+  z-index: 1;
+  width: 208px;
+  height: 168px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.06));
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 104px 104px 18px 18px;
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.12), 0 0 0 1px rgba(212, 175, 55, 0.2),
+    0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+/* A soft glossy patch near the top-left of the dome, like light catching its curved surface -
+   purely cosmetic, matches the reference photo's glassy highlight. */
+.dice-dome-highlight {
+  position: absolute;
+  top: 10%;
+  left: 14%;
+  width: 42%;
+  height: 30%;
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  transform: rotate(-18deg);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Green felt floor visible through the bottom of the dome, matching the board's own felt palette -
+   this is where the three dice visibly rattle until the real result is revealed. */
+.dice-dome-felt {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: radial-gradient(ellipse at center, var(--felt-700), var(--felt-900) 85%);
+  box-shadow: inset 0 6px 10px rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+/* Each die shakes on its own small, looping jitter path (different amplitude/timing per die, plus
+   a staggered animation-delay) so the three rattle independently instead of moving in lockstep -
+   like three loose dice actually being shaken together in a shallow bowl, rather than falling any
+   distance. The `faces` state in DiceRollOverlay.tsx still randomizes which pips show every 120ms
+   throughout, same as the previous tower design. */
+.dice-dome-die {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+}
+
+.dice-dome-die-0 { animation: dice-dome-shake-0 0.5s ease-in-out infinite; }
+.dice-dome-die-1 { animation: dice-dome-shake-1 0.42s ease-in-out infinite; animation-delay: 0.06s; }
+.dice-dome-die-2 { animation: dice-dome-shake-2 0.46s ease-in-out infinite; animation-delay: 0.12s; }
+
+@keyframes dice-dome-shake-0 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  20%  { transform: translate(-7px, -5px) rotate(-14deg); }
+  40%  { transform: translate(6px, 3px) rotate(10deg); }
+  60%  { transform: translate(-5px, 5px) rotate(-9deg); }
+  80%  { transform: translate(6px, -3px) rotate(13deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes dice-dome-shake-1 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(6px, -4px) rotate(12deg); }
+  50%  { transform: translate(-6px, 4px) rotate(-15deg); }
+  75%  { transform: translate(5px, 5px) rotate(8deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes dice-dome-shake-2 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  30%  { transform: translate(-5px, 4px) rotate(-10deg); }
+  55%  { transform: translate(7px, -3px) rotate(15deg); }
+  80%  { transform: translate(-6px, -5px) rotate(-12deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Metal trim ring where the dome meets the base, like the reference photo's silver band - overlaps
+   the dome's bottom edge slightly so it reads as one continuous physical object. */
+.dice-dome-ring {
+  position: relative;
+  z-index: 1;
+  width: 216px;
+  height: 14px;
+  margin-top: -6px;
+  background: linear-gradient(180deg, #d7dbde, #8b9095 55%, #4d5155);
+  border-radius: 7px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Black plinth the whole device stands on, with two bolt heads like the reference photo's base. */
+.dice-dome-base {
+  position: relative;
+  z-index: 0;
+  width: 244px;
+  height: 28px;
+  margin-top: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: linear-gradient(180deg, #2e2f31, #111214 70%, #000);
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dice-dome-bolt {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d7dbde, #55595c 70%);
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+.dice-roll-overlay-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f2f2f2;
+}
+
+.dice-roll-overlay-countdown {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  text-shadow: 0 2px 12px rgba(212, 175, 55, 0.35);
+}
+
+/* --- Token request alert toast ---
+   Dealer-only floating alert for a new token request (TablePage's onTokenRequested handler).
+   z-index above the dice-roll overlay (60) but below the leave-confirm dialog (70), since it's
+   just an informational nudge that shouldn't block a more important overlay. */
+.token-request-toast {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, var(--felt-700), var(--felt-900));
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  animation: token-request-toast-in 0.2s ease-out;
+  max-width: calc(100vw - 24px);
+}
+
+@keyframes token-request-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.token-request-toast-text {
+  color: #f1efe9;
+  font-size: 13.5px;
+  white-space: normal;
+}
+
+.token-request-toast-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* --- Leave-table confirmation ---
+   Asks a player with a non-zero balance whether to hand it back to the dealer before leaving.
+   z-index above the dice-roll overlay (60) since it can in principle appear over anything. */
+.leave-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 16px;
+}
+
+.leave-confirm-card {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 360px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-raised);
+}
+
+.leave-confirm-card h3 {
+  margin: 0;
+  color: var(--gold);
+}
+
+.leave-confirm-card p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.leave-confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* --- Board ---
+   Forced to `direction: ltr` regardless of the app's Persian RTL layout, so the panels sit on the
+   exact same left/right side as the physical felt reference photo (the big SPECDBL/COMBO3 grids on
+   the left, ODD/SMALL on the right, totals descending 17->4 left-to-right). Persian text elsewhere
+   on the page is unaffected; individual RTL text runs still render correctly inside an ltr block
+   thanks to the Unicode bidi algorithm. */
+.sicbo-board {
+  direction: ltr;
+  background:
+    radial-gradient(circle at 50% 0%, #128a41, transparent 60%),
+    linear-gradient(180deg, #0e6b34, #0a5228);
+  border: 6px solid #0a4020;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(0, 0, 0, 0.25);
+}
+
+.board-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.board-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.board-layout-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-layout-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.board-panel {
+  background: linear-gradient(180deg, #0d5f30, #0a5228);
+  border: 2px solid #0a4020;
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.2);
+}
+
+.group-banner,
+.group-banner-row .group-banner {
+  display: block;
+  text-align: center;
+  background: linear-gradient(#123822, #0a2515);
+  border: 1px solid #ffd76a;
+  border-radius: 4px;
+  color: #ffd76a;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+}
+
+.group-banner-num {
+  color: #fff6d8;
+  font-size: 16px;
+}
+
+.group-banner-row {
+  display: flex;
+  gap: 6px;
+}
+
+.group-banner-row .group-banner {
+  flex: 1;
+}
+
+/* Top band: EVEN/BIG stacked on the left, doubles+triples in the middle, ODD/SMALL stacked on the
+   right - mirrors the felt's headline row composition. */
+.top-triband {
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 150px;
+  flex: 0 0 150px;
+}
+
+.side-col .bet-spot {
+  flex: 1;
+}
+
+.mid-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.combos-row, .doubles-row, .triples-row, .singles-row, .totals-row, .specdbl-row, .combo3-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px;
+}
+
+.bet-spot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 62px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  border: 2px solid #1a1a1a;
+  background: linear-gradient(180deg, #d6293a, #b81b29);
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+.bet-spot:not(.disabled):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.bet-spot.accent-red {
+  background: linear-gradient(180deg, #d6293a, #b81b29);
+  border-color: #1a1a1a;
+}
+
+.bet-spot.accent-gold {
+  background: linear-gradient(180deg, #f7cd45, #e0ac1f);
+  border-color: #7a5c00;
+  color: #241a00;
+}
+
+.bet-spot.accent-gold .bet-spot-payout {
+  color: #4a3600;
+}
+
+.bet-spot.accent-blue {
+  background: linear-gradient(180deg, #2c7fe0, #1a5fb8);
+  border-color: #0b3f80;
+}
+
+/* The two exact sums sitting on the Small/Big boundary (10 and 11) in the left-column
+   SpecificDouble/ThreeNumberCombo grids get a diagonal split color instead of a flat blue/gold, so
+   they read as a distinct "border" case at a glance. Text stays white with a dark shadow since each
+   half has a different background lightness. */
+.bet-spot.accent-split-blue-pink {
+  background: linear-gradient(135deg, #2c7fe0 50%, #e0529c 50%);
+  border-color: #1a1a1a;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.bet-spot.accent-split-gold-purple {
+  background: linear-gradient(135deg, #f7cd45 50%, #3a1256 50%);
+  border-color: #1a1a1a;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.bet-spot-faces {
+  display: flex;
+  gap: 2px;
+}
+
+.bet-spot-label {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.bet-spot-payout {
+  font-size: 10px;
+  color: #ffe27a;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Colored strip inside a spot (e.g. "BIG" / "ANY TRIPLE"), echoing the gold banner bars painted
+   directly on the felt above those specific spots. */
+.bet-spot-banner {
+  align-self: stretch;
+  text-align: center;
+  background: #f2c230;
+  color: #241a00;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  padding: 3px 4px;
+  margin: -6px -4px 2px;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Same bold banner treatment as BIG's gold bar (identical font-size/weight/letter-spacing), just
+   recolored blue - so SMALL reads with the same visual weight as BIG instead of the plain small
+   label it used to fall back to, echoing the blue-for-small/gold-for-big convention already used
+   for the SpecificDouble/ThreeNumberCombo spots elsewhere on this board (see bigSmallAccent()). */
+.bet-spot-banner-blue {
+  background: #2c7fe0;
+  color: #eaf4ff;
+  border-bottom: 3px solid #0b3f80;
+}
+
+.bet-spot-chip {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d4af37;
+  color: #101010;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+  z-index: 1;
+}
+
+.bet-spot-chip:hover {
+  background: #ff5252;
+  color: #fff;
+  transform: scale(1.15);
+}
+
+.bet-spot-chip:disabled {
+  cursor: not-allowed;
+}
+
+/* The whole cell lights up (not just a ring around it) so a winning spot is unmistakable even at a
+   glance from across a phone screen. */
+.bet-spot.winner {
+  background: #3ddc57;
+  border-color: #1f8c37;
+  color: #06280f;
+  box-shadow: 0 0 20px 6px rgba(61, 220, 87, 0.85);
+  animation: winner-glow 0.9s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+.bet-spot.winner .bet-spot-payout {
+  color: #0a3d18;
+}
+
+.bet-spot.winner .bet-spot-banner {
+  background: #06280f;
+  color: #3ddc57;
+}
+
+@keyframes winner-glow {
+  from {
+    box-shadow: 0 0 12px 3px rgba(61, 220, 87, 0.7);
+    filter: brightness(1);
+  }
+  to {
+    box-shadow: 0 0 26px 8px rgba(61, 220, 87, 1);
+    filter: brightness(1.2);
+  }
+}
+
+.bet-spot.loser {
+  opacity: 0.5;
+}
+
+.bet-spot.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bet-spot.drag-over {
+  outline: 3px dashed #ffd76a;
+  box-shadow: 0 0 14px rgba(255, 215, 106, 0.9);
+  filter: brightness(1.15);
+}
+
+/* Currently-selected source spot of an in-progress bet move (see TablePage.movingBet) - a calmer,
+   non-win/loss-colored pulse so it reads as "pick where this goes", distinct from the green win glow. */
+.bet-spot.move-source {
+  outline: 3px dashed #6ac8ff;
+  box-shadow: 0 0 16px 4px rgba(106, 200, 255, 0.75);
+  animation: move-source-pulse 1s ease-in-out infinite alternate;
+  z-index: 2;
+}
+
+@keyframes move-source-pulse {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(1.2);
+  }
+}
+
+.move-bet-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #143a52;
+  border: 1px solid #6ac8ff;
+  border-radius: 8px;
+  color: #dff2ff;
+  font-size: 14px;
+}
+
+.bet-spot-large {
+  min-height: 88px;
+}
+
+.bet-spot-large .bet-spot-label {
+  font-size: 22px;
+}
+
+.bet-spot-large .bet-spot-payout {
+  font-size: 12px;
+}
+
+.single-caption {
+  text-align: center;
+  color: #ffd76a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 640px) {
+  .board-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .top-triband {
+    flex-wrap: wrap;
+  }
+
+  .side-col {
+    width: auto;
+    flex: 1 1 45%;
+  }
+
+  .mid-col {
+    flex: 1 1 100%;
+    order: 3;
+  }
+}
+
+/* Small phones in portrait - tighten every layer of padding so the board (the one thing that
+   genuinely needs width) gets as much of the narrow viewport as possible. */
+@media (max-width: 400px) {
+  .table-page {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .sicbo-board {
+    padding: 8px;
+    border-width: 4px;
+  }
+
+  .board-panel {
+    padding: 5px;
+  }
+
+  .lobby-page {
+    padding: 16px 10px;
+  }
+
+  .table-header h2 {
+    font-size: 16px;
+  }
+}
+
+/* --- Dealer panel --- */
+.dealer-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dealer-panel h3 {
+  margin: 0;
+  color: var(--gold);
+}
+
+.my-bets-panel h4,
+.round-history-panel h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+.dealer-panel-invite {
+  font-size: 13px;
+  color: #cfcfcf;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.copy-icon-btn {
+  border: 1px solid var(--felt-line);
+  background: var(--felt-700);
+  color: #f1efe9;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.copy-icon-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.copy-icon-btn:active {
+  transform: translateY(0);
+}
+
+.dealer-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dealer-panel-actions .btn {
+  flex: 1 1 140px;
+}
+
+.dealer-panel-section h4 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #cfcfcf;
+}
+
+.dealer-panel-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dealer-panel-row input[type="number"] {
+  width: 90px;
+}
+
+.player-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #cfcfcf;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dealer-panel-message {
+  font-size: 13px;
+  color: #3ddc57;
+}
+
+.dealer-panel-empty {
+  font-size: 13px;
+  color: #8a8a8a;
+  margin: 0;
+}
+
+.token-request-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #cfcfcf;
+}
+
+.token-request-box input[type="number"] {
+  width: 90px;
+}
+
+/* --- Chat --- */
+.chat-box {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+}
+
+.chat-messages {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  min-height: 80px;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-row input {
+  flex: 1;
+}
+
+.chat-empty {
+  color: #6f6f6f;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.chat-message {
+  background: var(--felt-700);
+  border-radius: 8px;
+  padding: 5px 9px;
+  max-width: 85%;
+  align-self: flex-start;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.chat-message-own {
+  background: var(--felt-line);
+  align-self: flex-end;
+}
+
+.chat-message-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: #d4af37;
+}
+
+.chat-message-time {
+  color: #8fae9a;
+  font-weight: 400;
+}
+
+.chat-message-text {
+  font-size: 13px;
+  color: #f1efe9;
+  word-break: break-word;
+}
+
+.my-bets-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.my-bets-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.all-bets-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.all-bets-panel h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+.all-bets-panel > ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.all-bets-player-name {
+  font-weight: 600;
+  color: #e6e6e6;
+}
+
+.all-bets-player-sublist {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-inline-start: 10px;
+  color: #cfcfcf;
+}
+
+.round-history-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.round-history-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.members-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.members-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.members-panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.members-panel-unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-start: 6px;
+  border-radius: 50%;
+  background: var(--danger);
+  vertical-align: middle;
+}
+
+.private-chat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 16px;
+}
+
+.private-chat-card {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: 14px;
+  padding: 16px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-raised);
+}
+
+.private-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.private-chat-header h3 {
+  margin: 0;
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.private-chat-close {
+  padding: 4px 10px;
+}
+
+.private-chat-box {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  max-height: 340px;
+}
+
+.video-panel {
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Collapse/expand handle - lets a phone player tuck the camera grid away without losing it into
+   the drawer, so it stays a one-tap main-screen control rather than eating permanent vertical
+   space the board/dice/chips need to keep the whole table playable within a single screen. */
+.video-panel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 2px;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.video-panel-toggle-chevron {
+  color: var(--gold);
+  font-size: 11px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+/* Hidden via CSS, not unmounted - see VideoPanel.tsx comment: this keeps remote participants'
+   audio playing while collapsed, only the video tiles disappear from view. */
+.video-grid-collapsed {
+  display: none;
+}
+
+.video-tile {
+  position: relative;
+  background: #06120c;
+  border: 1px solid #2e5c3e;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
+.video-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-tile-name {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.video-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.video-warning {
+  color: #d4af37;
+  font-size: 13px;
+  background: rgba(212, 175, 55, 0.1);
+  padding: 8px;
+  border-radius: 6px;
+}
+
+/* --- Install-as-app banner (PWA) --- */
+.install-app-banner {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 10px;
+  background: linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  box-shadow: var(--shadow-raised);
+}
+
+.install-app-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.install-app-dismiss {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.install-app-dismiss:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--ink);
+}
+
+.install-app-ios-hint {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(320px, 85vw);
+  background: var(--felt-950);
+  border: 1px solid var(--felt-line);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .install-app-banner {
+    bottom: 10px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    justify-content: center;
+  }
+
+  .install-app-btn {
+    flex: 1;
+  }
+}
+
+.site-footer {
+  text-align: center;
+  padding: 14px 12px 18px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.site-footer-link {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-footer-link:hover {
+  text-decoration: underline;
+}

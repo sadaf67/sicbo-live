@@ -1,0 +1,14 @@
+# Distinct ports from PokerLive's livekit instance (7880/7881/50000-60000), since both containers
+# run with network_mode: host on the same VPS and would otherwise collide.
+port: 7882
+rtc:
+  tcp_port: 7883
+  port_range_start: 40000
+  port_range_end: 49999
+  # use_external_ip's STUN auto-detection times out on this VPS (outbound STUN/UDP appears
+  # blocked or too slow) - same issue hit on PokerLive's instance. The VPS's public IP is static
+  # and already known (185.192.114.120, same one sicbo.bazilive.ir/sadafkohan.ir resolve to), so
+  # pin it directly instead of relying on STUN.
+  node_ip: 185.192.114.120
+keys:
+  c24cdfbe283e69d8c0e2bdd3: zpFpObhzJ6OoKEnuyLy1v48BQlbzZijlMo0hPqrkmbU=

@@ -1,0 +1,34 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sicbolive_web
+    restart: unless-stopped
+    # فقط nginx هاست (خارج از این کامپوز) از طریق loopback به این پورت دسترسی دارد.
+    # همان پورتی که قبلاً پروتوتایپ اشتباه سیکبو استفاده می‌کرد (8090) تا nginx نیازی به تغییر نداشته باشد.
+    ports:
+      - "127.0.0.1:8090:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - InternalApi__Key=${INTERNAL_API_KEY}
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=SicBoLive
+      - Jwt__Audience=SicBoLive.Client
+      - Jwt__ExpiryHours=12
+      - LiveKit__ApiKey=${LIVEKIT_API_KEY}
+      - LiveKit__ApiSecret=${LIVEKIT_API_SECRET}
+      - LiveKit__WsUrl=wss://livekit-sicbo.bazilive.ir
+      - LiveKit__TokenTtlMinutes=180
+      - ClientOrigins__0=https://sicbo.bazilive.ir
+      # عمداً خالی - این بازی از همان ربات تلگرام مشترک (game2026bot) استفاده می‌کند،
+      # نه ربات مستقل داخلی خودش. اگر توکن اینجا خالی بماند، TelegramBotService.ExecuteAsync
+      # به‌صورت امن هیچ کاری انجام نمی‌دهد (بدون کرش).
+      - Telegram__BotToken=
+      - Telegram__AdminChatId=
+      - Telegram__ClientUrl=https://sicbo.bazilive.ir
+    volumes:
+      - sicbolive_data:/app/data
+
+volumes:
+  sicbolive_data:

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SicBo Live — نمونه‌کار بازی زنده سیک‌بو</title>
+<style>
+  :root {
+    --bg: #0a160f;
+    --panel: #0d1f16;
+    --panel-light: #12291c;
+    --border: #1e3a28;
+    --gold: #e8c14a;
+    --gold-soft: #f0d878;
+    --text: #eaf3ec;
+    --text-dim: #9db4a6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+    background: radial-gradient(ellipse at top, #123321 0%, var(--bg) 60%);
+    color: var(--text);
+    line-height: 1.9;
+  }
+  header.hero {
+    text-align: center;
+    padding: 64px 20px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero h1 {
+    font-size: 2.4rem;
+    color: var(--gold);
+    margin: 0 0 10px;
+    letter-spacing: 1px;
+  }
+  header.hero p.sub {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  header.hero .badges {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+  header.hero .badge {
+    border: 1px solid var(--border);
+    background: var(--panel-light);
+    color: var(--gold-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 50px 20px 80px;
+  }
+  section.intro {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 56px;
+  }
+  section.intro h2 {
+    color: var(--gold);
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+  section.intro ul {
+    margin: 14px 0 0;
+    padding-inline-start: 22px;
+    color: var(--text-dim);
+  }
+  section.intro li { margin-bottom: 6px; }
+  .shots {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+  .shot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .shot:nth-child(even) { direction: ltr; }
+  .shot:nth-child(even) .shot-text { direction: rtl; }
+  .shot-frame {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 10px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+  .shot-frame img {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .shot-text .tag {
+    display: inline-block;
+    color: var(--bg);
+    background: var(--gold);
+    font-weight: bold;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .shot-text h3 {
+    font-size: 1.4rem;
+    margin: 0 0 10px;
+    color: var(--text);
+  }
+  .shot-text p {
+    color: var(--text-dim);
+    margin: 0;
+    font-size: 0.98rem;
+  }
+  @media (max-width: 820px) {
+    .shot, .shot:nth-child(even) { grid-template-columns: 1fr; direction: rtl; }
+    .shot:nth-child(even) .shot-text { direction: rtl; }
+  }
+  footer {
+    text-align: center;
+    padding: 40px 20px 60px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--gold-soft); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>SicBo Live</h1>
+  <p class="sub">
+    بازی زنده و چندنفرهٔ سیک‌بو با دیلر واقعی، پخش زندهٔ تصویر و صدا، و ژتون امتیازی —
+    بدون هیچ‌گونه پول واقعی. تصاویر زیر مستقیماً از نسخهٔ در حال اجرای پروژه گرفته شده‌اند.
+  </p>
+  <div class="badges">
+    <span class="badge">ASP.NET Core + SignalR</span>
+    <span class="badge">React / TypeScript</span>
+    <span class="badge">پخش زندهٔ تصویر با LiveKit</span>
+    <span class="badge">پنل مدیریت و اشتراک</span>
+    <span class="badge">ورود از طریق ربات تلگرام</span>
+  </div>
+</header>
+
+<main>
+  <section class="intro">
+    <h2>دربارهٔ این نمونه‌کار</h2>
+    <ul>
+      <li>یک بازی کازینویی زنده و چندنفره با تاس، شرط‌بندی لحظه‌ای و اعلام نتیجه به‌صورت آنی برای همهٔ بازیکنان میز.</li>
+      <li>ارتباط زنده بین دیلر و بازیکنان با تصویر و صدا (LiveKit)، هم‌زمان با هماهنگی وضعیت بازی از طریق SignalR.</li>
+      <li>حساب کاربری صرفاً از طریق ربات تلگرام ساخته می‌شود؛ بدون فرم ثبت‌نام عمومی در وب.</li>
+      <li>سیستم ژتون امتیازی داخلی — هیچ اتصال یا تراکنش پول واقعی در بازی وجود ندارد.</li>
+      <li>پنل مدیریت کامل برای مدیریت بازیکنان، میزها و طرح‌های اشتراک.</li>
+    </ul>
+  </section>
+
+  <div class="shots">
+
+    <div class="shot">
+      <div class="shot-frame"><img src="01-login.jpg" alt="صفحهٔ ورود SicBo Live" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۱ — ورود</span>
+        <h3>صفحهٔ ورود</h3>
+        <p>طراحی تیره و مینیمال هماهنگ با فضای کازینویی بازی. حساب کاربری فقط از طریق ربات تلگرام
+          ساخته می‌شود و نام‌کاربری/رمز عبور به‌صورت خودکار برای کاربر ارسال می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="shot-frame"><img src="02-lobby.jpg" alt="لابی و مدیریت میزها" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۲ — لابی</span>
+        <h3>مدیریت میزها</h3>
+        <p>هر بازیکن می‌تواند نقش دیلر بگیرد و میز خودش را با نام، حداقل/حداکثر ژتون و زمان
+          شرط‌بندی دلخواه بسازد؛ یا با کد دعوت به میز بازیکن دیگری بپیوندد.</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="shot-frame"><img src="03-table-betting.jpg" alt="میز بازی در فاز شرط‌بندی با پخش زندهٔ تصویر" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۳ — فاز شرط‌بندی</span>
+        <h3>میز زنده با تصویر دیلر</h3>
+        <p>پنل دوربین و میکروفون دیلر به‌صورت زنده در بالای میز نمایش داده می‌شود. تایمر
+          شمارش معکوس، مدت‌زمان باقی‌ماندهٔ شرط‌بندی هر دور را به همهٔ اعضای میز نشان می‌دهد.</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="shot-frame"><img src="04-table-result.jpg" alt="انیمیشن پرتاب تاس" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۴ — پرتاب تاس</span>
+        <h3>انیمیشن لحظهٔ پرتاب</h3>
+        <p>پس از پایان زمان شرط‌بندی، دیلر تاس‌ها را می‌اندازد و یک انیمیشن سه‌بعدیِ تکان‌خوردن
+          تاس داخل کاسه، پیش از اعلام نتیجهٔ نهایی برای همهٔ بازیکنان پخش می‌شود.</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="shot-frame"><img src="06-table-result-final.jpg" alt="نتیجهٔ نهایی تاس و برد میدان‌ها" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۵ — نتیجهٔ دور</span>
+        <h3>اعلام نتیجه و برد لحظه‌ای</h3>
+        <p>مجموع تاس‌ها (در این مثال ۱۲) بلافاصله محاسبه و نمایش داده می‌شود و میدان‌های برندهٔ
+          جدول شرط‌بندی — مثل EVEN و BIG — به‌رنگ سبز روشن می‌شوند.</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <div class="shot-frame"><img src="07-table-grid-final.jpg" alt="جدول کامل شرط‌بندی سیک‌بو" /></div>
+      <div class="shot-text">
+        <span class="tag">۰۶ — جدول شرط‌بندی</span>
+        <h3>جدول کامل شرط‌ها</h3>
+        <p>تمام حالت‌های استاندارد شرط‌بندی سیک‌بو — ترکیب‌های سه‌تایی، جفت‌های خاص، مجموع دقیق
+          و نسبت‌های برد هرکدام — در یک چیدمان شفاف و واضح در دسترس بازیکن است.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  تهیه شده توسط <a href="https://sadafkohan.ir" target="_blank" rel="noopener">sadafkohan.ir</a>
+  — این تصاویر مستقیماً از نسخهٔ در حال اجرای واقعی پروژه گرفته شده‌اند.
+</footer>
+
+</body>
+</html>

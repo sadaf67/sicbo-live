@@ -1,0 +1,66 @@
+# ── AI assistant / local notes ─────────────────────────
+CLAUDE.md
+AGENTS.md
+.claude/
+.codex/
+.agents/
+
+# ── Secrets (NEVER commit) ─────────────────────────────
+.env
+.env.*
+!.env.example
+**/appsettings.json
+**/appsettings.Development.json
+**/appsettings.Production.json
+!**/appsettings.example.json
+*.pfx
+*.p12
+secrets.json
+
+# ── .NET ───────────────────────────────────────────────
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userprefs
+TestResults/
+publish/
+
+# ── Databases ──────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ── Node / Vite ────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# ── Third-party binaries (download separately) ─────────
+tools/livekit-server/
+*.exe
+*.dll
+*.msi
+
+# ── Logs & temp ────────────────────────────────────────
+*.log
+tmp*/
+temp/
+
+# ── Archives & office docs ─────────────────────────────
+*.rar
+*.zip
+*.7z
+*.docx
+
+# ── Local-only assets ──────────────────────────────────
+promo-video.html
+
+# ── Editors / OS ───────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini

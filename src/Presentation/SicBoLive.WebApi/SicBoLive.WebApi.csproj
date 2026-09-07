@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- This machine's CPU/driver combo crashes (0xc0000602 fail-fast) when Windows enforces
+         CET shadow stacks on the apphost, especially when launched via Visual Studio's own
+         process launcher (which applies CET regardless of DOTNET_EnableCET env vars). Marking
+         the apphost as CET-incompatible at the PE-header level fixes this for every launch
+         method (VS F5/Ctrl+F5, terminal, etc.) without touching Windows security settings. -->
+    <CetCompat>false</CetCompat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.16" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <!-- EF Core CLI tools (dotnet ef migrations add/database update) need this package
+         directly visible on the startup project. Infrastructure's own reference to it has
+         PrivateAssets="all" (correct - consumers shouldn't get a transitive design-time
+         dependency at runtime), so it doesn't flow here automatically. PrivateAssets="all"
+         here too, for the same reason: this is a build/tooling-only dependency. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Telegram.Bot" Version="22.10.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\SicBoLive.Domain\SicBoLive.Domain.csproj" />
+    <ProjectReference Include="..\..\Core\SicBoLive.Application\SicBoLive.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\SicBoLive.Infrastructure\SicBoLive.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

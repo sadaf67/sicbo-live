@@ -1,0 +1,6 @@
+@SicBoLive.WebApi_HostAddress = http://localhost:5232
+
+GET {{SicBoLive.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

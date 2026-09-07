@@ -1,0 +1,14 @@
+services:
+  livekit:
+    # Pulled via docker.m.daocloud.io mirror (registry-1.docker.io/production.cloudfront.docker.com
+    # returns 403 Forbidden from this VPS's IP - a CDN geo-block, not a Docker Hub auth issue).
+    # If this mirror ever goes stale, re-pull with:
+    #   docker pull docker.m.daocloud.io/livekit/livekit-server:latest
+    #   docker tag docker.m.daocloud.io/livekit/livekit-server:latest livekit/livekit-server:latest
+    image: livekit/livekit-server:latest
+    container_name: sicbolive_livekit
+    restart: unless-stopped
+    network_mode: host
+    command: --config /etc/livekit.yaml
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
